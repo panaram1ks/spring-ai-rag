@@ -24,7 +24,7 @@ public class OllamaServiceImpl implements OllamaService {
     private final ChatModel chatModel;
     private final SimpleVectorStore vectorStore;
 
-    @Value("classpath:/templates/rag-prompt-template.st")
+    @Value("classpath:/templates/rag-promt-meta-data.st")
     private Resource ragPromptTemplate;
 
     @Override
@@ -32,10 +32,11 @@ public class OllamaServiceImpl implements OllamaService {
         List<Document> documents = vectorStore.similaritySearch(
                 SearchRequest.builder()
                         .query(question.question())
-                        .topK(5)
+                        .topK(6)
                         .build()
         );
         List<String> contentList = documents.stream().map(Document::getContent).toList();
+        System.out.println(contentList);
 
 
         PromptTemplate promptTemplate = new PromptTemplate(ragPromptTemplate);
@@ -44,6 +45,8 @@ public class OllamaServiceImpl implements OllamaService {
                 "input", question.question(),
                 "documents",  String.join("\n", contentList)));
 //        Prompt prompt = promptTemplate.create();
+
+        System.out.println("prompt " + prompt);
         ChatResponse chatResponse = chatModel.call(prompt);
         return new Answer(chatResponse.getResult().getOutput().getContent());
     }
